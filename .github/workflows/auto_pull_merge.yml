@@ -1,0 +1,32 @@
+name: Auto Pull Request and Merge
+
+on:
+  push:
+    branches:
+      - '**'  # Triggers on push to any branch
+
+jobs:
+  create_pull_request:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Create Pull Request
+        id: create_pr
+        uses: peter-evans/create-pull-request@v3
+        with:
+          title: 'Auto-generated Pull Request'
+          body: 'This pull request is automatically created by GitHub Actions.'
+          base: main  # Change to your default branch if it's not 'main'
+          branch: ${{ github.head_ref }}
+
+  merge_pull_request:
+    runs-on: ubuntu-latest
+    needs: create_pull_request
+    steps:
+      - name: Merge Pull Request
+        uses: "peter-evans/merge-pull-request@v3"
+        with:
+          pull-request-number: ${{ steps.create_pr.outputs.pull-request-number }}
+          merge-method: merge  # You can change to 'squash' or 'rebase' if needed
